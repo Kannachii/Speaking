@@ -1,0 +1,1416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🗣️ SPEAKING ADVENTURE: FORM 2</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            purple: '#6d28d9',
+                            pink: '#ec4899',
+                            yellow: '#f59e0b',
+                            blue: '#3b82f6',
+                            green: '#10b981',
+                            dark: '#0f172a'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Fredoka', 'Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts: Fredoka & Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body {
+            font-family: 'Fredoka', 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #311042 100%);
+            min-height: 100vh;
+            color: #f8fafc;
+            user-select: none;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.6);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #6d28d9;
+            border-radius: 4px;
+        }
+
+        /* Card Flip Animations */
+        .card-container {
+            perspective: 1000px;
+        }
+        .card-inner {
+            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-style: preserve-3d;
+        }
+        .card-inner.flipped {
+            transform: rotateY(180deg);
+        }
+        .card-front, .card-back {
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+        }
+        .card-back {
+            transform: rotateY(180deg);
+        }
+
+        /* Pulse & Glow Effects */
+        .glow-effect {
+            box-shadow: 0 0 25px rgba(245, 158, 11, 0.5);
+        }
+        .glow-blue {
+            box-shadow: 0 0 25px rgba(59, 130, 246, 0.5);
+        }
+        .glow-purple {
+            box-shadow: 0 0 25px rgba(168, 85, 247, 0.5);
+        }
+
+        @keyframes bounce-subtle {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+        .animate-bounce-subtle {
+            animation: bounce-subtle 2s infinite ease-in-out;
+        }
+
+        @keyframes pulse-ring {
+            0% { transform: scale(0.95); opacity: 0.8; }
+            50% { transform: scale(1.05); opacity: 1; }
+            100% { transform: scale(0.95); opacity: 0.8; }
+        }
+        .animate-pulse-ring {
+            animation: pulse-ring 1.5s infinite ease-in-out;
+        }
+
+        /* Confetti Canvas overlay */
+        #confettiCanvas {
+            pointer-events: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen justify-between overflow-x-hidden text-slate-100">
+
+    <!-- TOP NAVIGATION BAR -->
+    <header class="bg-slate-900/80 backdrop-blur-md border-b border-purple-500/30 sticky top-0 z-40 px-4 py-3">
+        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+            <!-- Brand Logo -->
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="showScreen('main-menu')">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-purple-600 to-pink-500 flex items-center justify-center text-xl shadow-lg shadow-purple-500/30">
+                    🗣️
+                </div>
+                <div>
+                    <h1 class="font-extrabold text-xl md:text-2xl tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-pink-400 to-purple-400">
+                        SPEAKING ADVENTURE
+                    </h1>
+                    <p class="text-xs text-purple-300 font-semibold tracking-wider">FORM 2 • THINK • SPEAK • SCORE!</p>
+                </div>
+            </div>
+
+            <!-- Dashboard Stats & Quick Navigation -->
+            <div class="flex items-center space-x-2 md:space-x-4">
+                <!-- Score Display -->
+                <div class="bg-slate-800/90 border border-yellow-500/40 rounded-full px-4 py-1.5 flex items-center space-x-2 shadow-inner">
+                    <span class="text-yellow-400 text-lg">⭐</span>
+                    <span class="text-xs text-slate-300 font-bold uppercase hidden sm:inline">Score:</span>
+                    <span id="nav-score" class="font-black text-xl text-yellow-400">0</span>
+                </div>
+
+                <!-- Sound Toggle -->
+                <button onclick="toggleAudio()" id="audio-btn" title="Toggle Sound Effects" class="bg-slate-800 hover:bg-slate-700 p-2.5 rounded-full text-slate-200 border border-slate-700 transition">
+                    <i id="audio-icon" class="fas fa-volume-up text-lg text-emerald-400"></i>
+                </button>
+
+                <!-- Menu Button -->
+                <button onclick="showScreen('main-menu')" class="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 px-4 py-2 rounded-full font-bold text-sm text-white shadow-md flex items-center space-x-1.5 transition transform hover:scale-105">
+                    <i class="fas fa-home"></i>
+                    <span class="hidden md:inline">Main Menu</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- CONFETTI CANVAS -->
+    <canvas id="confettiCanvas"></canvas>
+
+    <!-- MAIN CONTAINER -->
+    <main class="flex-grow max-w-7xl w-full mx-auto p-4 md:p-6 relative">
+
+        <!-- SCREEN 1: MAIN MENU -->
+        <section id="screen-main-menu" class="screen-view active space-y-8 py-4">
+            <!-- Hero Banner -->
+            <div class="text-center space-y-3 max-w-3xl mx-auto py-4">
+                <span class="px-4 py-1.5 rounded-full bg-purple-900/60 border border-purple-500/40 text-purple-300 font-semibold text-xs md:text-sm inline-block uppercase tracking-widest animate-pulse">
+                    🏫 Interactive Classroom Speaking Game
+                </span>
+                <h2 class="text-4xl md:text-6xl font-black tracking-tight text-white drop-shadow-md">
+                    Ready to <span class="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-pink-400 to-cyan-400">Speak Up?</span>
+                </h2>
+                <p class="text-slate-300 text-base md:text-lg max-w-xl mx-auto font-medium">
+                    Boost your English speaking skills through 11 exciting real-world topics. Answer aloud, earn stars, and master Form 2 Speaking!
+                </p>
+            </div>
+
+            <!-- Grid Menu Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
+                <!-- Mode 1: Quick Speak -->
+                <div onclick="startQuickSpeak()" class="bg-slate-800/80 hover:bg-slate-800 border-2 border-cyan-500/40 hover:border-cyan-400 rounded-3xl p-6 cursor-pointer transition transform hover:-translate-y-2 hover:shadow-2xl hover:shadow-cyan-500/20 group relative overflow-hidden flex flex-col justify-between">
+                    <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-cyan-500/10 rounded-full group-hover:scale-150 transition"></div>
+                    <div class="space-y-4">
+                        <div class="w-14 h-14 rounded-2xl bg-cyan-500/20 flex items-center justify-center text-3xl text-cyan-400 border border-cyan-500/40">
+                            ⚡
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-black text-cyan-300 group-hover:text-cyan-200">QUICK SPEAK</h3>
+                            <p class="text-slate-400 text-sm mt-1">Instant speaking prompt from any topic. Fast & fun warm-ups!</p>
+                        </div>
+                    </div>
+                    <div class="mt-6 flex items-center justify-between font-bold text-cyan-400 group-hover:translate-x-1 transition">
+                        <span>Play Now</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </div>
+                </div>
+
+                <!-- Mode 2: Speaking Adventure Map -->
+                <div onclick="showScreen('speaking-map')" class="bg-slate-800/80 hover:bg-slate-800 border-2 border-purple-500/40 hover:border-purple-400 rounded-3xl p-6 cursor-pointer transition transform hover:-translate-y-2 hover:shadow-2xl hover:shadow-purple-500/20 group relative overflow-hidden flex flex-col justify-between">
+                    <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-purple-500/10 rounded-full group-hover:scale-150 transition"></div>
+                    <div class="space-y-4">
+                        <div class="w-14 h-14 rounded-2xl bg-purple-500/20 flex items-center justify-center text-3xl text-purple-400 border border-purple-500/40">
+                            🗺️
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-black text-purple-300 group-hover:text-purple-200">SPEAKING ADVENTURE</h3>
+                            <p class="text-slate-400 text-sm mt-1">Journey through 11 unlockable stages from Level 1 to Level 4!</p>
+                        </div>
+                    </div>
+                    <div class="mt-6 flex items-center justify-between font-bold text-purple-400 group-hover:translate-x-1 transition">
+                        <span>Explore Map</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </div>
+                </div>
+
+                <!-- Mode 3: Speaking Battle -->
+                <div onclick="startBattleMode()" class="bg-slate-800/80 hover:bg-slate-800 border-2 border-pink-500/40 hover:border-pink-400 rounded-3xl p-6 cursor-pointer transition transform hover:-translate-y-2 hover:shadow-2xl hover:shadow-pink-500/20 group relative overflow-hidden flex flex-col justify-between">
+                    <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-pink-500/10 rounded-full group-hover:scale-150 transition"></div>
+                    <div class="space-y-4">
+                        <div class="w-14 h-14 rounded-2xl bg-pink-500/20 flex items-center justify-center text-3xl text-pink-400 border border-pink-500/40">
+                            ⚔️
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-black text-pink-300 group-hover:text-pink-200">SPEAKING BATTLE</h3>
+                            <p class="text-slate-400 text-sm mt-1">2-Player classroom showdown! First student to 10 points wins!</p>
+                        </div>
+                    </div>
+                    <div class="mt-6 flex items-center justify-between font-bold text-pink-400 group-hover:translate-x-1 transition">
+                        <span>Start Competition</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </div>
+                </div>
+
+                <!-- Mode 4: Speaking Wheel -->
+                <div onclick="showScreen('speaking-wheel')" class="bg-slate-800/80 hover:bg-slate-800 border-2 border-yellow-500/40 hover:border-yellow-400 rounded-3xl p-6 cursor-pointer transition transform hover:-translate-y-2 hover:shadow-2xl hover:shadow-yellow-500/20 group relative overflow-hidden flex flex-col justify-between">
+                    <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-yellow-500/10 rounded-full group-hover:scale-150 transition"></div>
+                    <div class="space-y-4">
+                        <div class="w-14 h-14 rounded-2xl bg-yellow-500/20 flex items-center justify-center text-3xl text-yellow-400 border border-yellow-500/40">
+                            🎡
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-black text-yellow-300 group-hover:text-yellow-200">SPEAKING WHEEL</h3>
+                            <p class="text-slate-400 text-sm mt-1">Spin the animated topic wheel and tackle random challenges!</p>
+                        </div>
+                    </div>
+                    <div class="mt-6 flex items-center justify-between font-bold text-yellow-400 group-hover:translate-x-1 transition">
+                        <span>Spin Wheel</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </div>
+                </div>
+
+                <!-- Mode 5: Mystery Cards -->
+                <div onclick="showScreen('mystery-cards')" class="bg-slate-800/80 hover:bg-slate-800 border-2 border-emerald-500/40 hover:border-emerald-400 rounded-3xl p-6 cursor-pointer transition transform hover:-translate-y-2 hover:shadow-2xl hover:shadow-emerald-500/20 group relative overflow-hidden flex flex-col justify-between">
+                    <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-emerald-500/10 rounded-full group-hover:scale-150 transition"></div>
+                    <div class="space-y-4">
+                        <div class="w-14 h-14 rounded-2xl bg-emerald-500/20 flex items-center justify-center text-3xl text-emerald-400 border border-emerald-500/40">
+                            🎴
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-black text-emerald-300 group-hover:text-emerald-200">MYSTERY CARDS</h3>
+                            <p class="text-slate-400 text-sm mt-1">Pick and flip mystery cards for questions and bonus challenges!</p>
+                        </div>
+                    </div>
+                    <div class="mt-6 flex items-center justify-between font-bold text-emerald-400 group-hover:translate-x-1 transition">
+                        <span>Pick Cards</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </div>
+                </div>
+
+                <!-- How to Play & Reset -->
+                <div class="bg-slate-800/60 border border-slate-700/80 rounded-3xl p-6 flex flex-col justify-between">
+                    <div class="space-y-4">
+                        <div class="w-14 h-14 rounded-2xl bg-slate-700/50 flex items-center justify-center text-3xl text-slate-300 border border-slate-600">
+                            📖
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-black text-slate-200">HOW TO PLAY</h3>
+                            <p class="text-slate-400 text-sm mt-1">Read prompt aloud 🗣️ • Use 💡 HELP if stuck • Teacher awards stars ⭐!</p>
+                        </div>
+                    </div>
+                    <div class="mt-6 flex items-center space-x-3">
+                        <button onclick="openHowToPlayModal()" class="flex-1 bg-slate-700 hover:bg-slate-600 text-slate-200 py-2.5 rounded-xl font-bold text-sm transition">
+                            <i class="fas fa-info-circle mr-1"></i> Rules
+                        </button>
+                        <button onclick="resetGameProgress()" class="bg-red-900/40 hover:bg-red-900/70 border border-red-500/40 text-red-300 px-3 py-2.5 rounded-xl text-sm font-bold transition" title="Reset All Game Progress">
+                            <i class="fas fa-rotate"></i> Reset
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SCREEN 2: ADVENTURE MAP -->
+        <section id="screen-speaking-map" class="screen-view hidden space-y-6">
+            <div class="flex flex-wrap items-center justify-between gap-4 bg-slate-800/80 p-5 rounded-3xl border border-purple-500/30">
+                <div>
+                    <h2 class="text-3xl font-black text-white flex items-center gap-2">
+                        <span>🗺️</span> SPEAKING ADVENTURE MAP
+                    </h2>
+                    <p class="text-slate-300 text-sm">Select a stage to begin your 4-Round speaking challenge.</p>
+                </div>
+                <button onclick="showScreen('main-menu')" class="bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-xl text-sm font-bold">
+                    ← Back to Menu
+                </button>
+            </div>
+
+            <!-- Stages Grid Map -->
+            <div id="stages-map-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 py-4">
+                <!-- Dynamically generated stage cards -->
+            </div>
+        </section>
+
+        <!-- SCREEN 3: ACTIVE CHALLENGE SCREEN -->
+        <section id="screen-challenge" class="screen-view hidden space-y-6">
+            <!-- Top Status Bar -->
+            <div class="flex flex-wrap items-center justify-between gap-4 bg-slate-800/90 p-4 rounded-3xl border border-slate-700">
+                <div class="flex items-center space-x-3">
+                    <span id="challenge-topic-icon" class="text-3xl p-2 bg-slate-700/60 rounded-2xl">🛍️</span>
+                    <div>
+                        <span id="challenge-topic-title" class="text-xs uppercase tracking-widest text-purple-400 font-bold">Topic 1</span>
+                        <h3 id="challenge-topic-name" class="text-xl md:text-2xl font-black text-white">MY FAVOURITE SHOP</h3>
+                    </div>
+                </div>
+                <!-- Round / Difficulty Level Tag -->
+                <div class="flex items-center space-x-3">
+                    <span id="challenge-level-badge" class="px-4 py-1.5 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-black uppercase tracking-wider">
+                        🟢 LEVEL 1 – EASY
+                    </span>
+                    <button onclick="leaveChallenge()" class="bg-slate-700 hover:bg-slate-600 text-slate-300 text-xs px-3 py-2 rounded-xl font-bold">
+                        Exit
+                    </button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Main Question & Prompt Box (2 cols) -->
+                <div class="lg:col-span-2 space-y-6">
+                    <!-- Question Card -->
+                    <div class="bg-gradient-to-br from-slate-800 to-indigo-950 border-2 border-indigo-500/40 rounded-3xl p-6 md:p-8 space-y-6 shadow-2xl relative overflow-hidden">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+                                <i class="fas fa-comment-dots text-purple-400 text-lg"></i>
+                                Speak Your Answer Aloud
+                            </span>
+                            <!-- New Question button -->
+                            <button onclick="loadNextRandomQuestionInTopic()" class="bg-slate-700/80 hover:bg-slate-700 text-slate-200 text-xs px-3 py-1.5 rounded-lg font-bold border border-slate-600 flex items-center gap-1.5">
+                                <i class="fas fa-sync-alt"></i> New Question
+                            </button>
+                        </div>
+
+                        <!-- Prompt Question Text -->
+                        <div class="py-2">
+                            <h4 id="challenge-question-text" class="text-2xl md:text-4xl font-extrabold text-white leading-relaxed tracking-wide drop-shadow">
+                                Where is your favourite shop?
+                            </h4>
+                        </div>
+
+                        <!-- Vocabulary Hints Banner -->
+                        <div id="challenge-vocab-container" class="bg-slate-900/60 rounded-2xl p-3 border border-slate-700/70 flex items-center space-x-2 text-xs text-slate-300">
+                            <span class="text-yellow-400 font-bold">💡 Keyword Hints:</span>
+                            <span id="challenge-vocab-tags" class="font-medium text-slate-200">mall, house, clothes, big</span>
+                        </div>
+
+                        <!-- Speaking Support Help Drawer -->
+                        <div class="space-y-2">
+                            <button onclick="toggleHelpDrawer()" class="w-full bg-yellow-500/20 hover:bg-yellow-500/30 border border-yellow-500/50 text-yellow-300 font-bold px-4 py-3 rounded-2xl flex items-center justify-between transition">
+                                <span class="flex items-center space-x-2">
+                                    <span class="text-xl">💡</span>
+                                    <span>NEED HELP? (Sentence Starters)</span>
+                                </span>
+                                <i id="help-chevron" class="fas fa-chevron-down transition-transform"></i>
+                            </button>
+                            <div id="help-drawer" class="hidden bg-slate-900/90 border border-yellow-500/30 rounded-2xl p-4 space-y-2 text-slate-200 text-base md:text-lg animate-fadeIn">
+                                <p class="text-xs text-yellow-400 font-bold uppercase">Fill in the blanks aloud:</p>
+                                <div id="help-drawer-content" class="space-y-2 font-medium">
+                                    <!-- Dynamic sentence starters inserted here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Speaking Timer Widget -->
+                    <div class="bg-slate-800/80 rounded-3xl p-6 border border-slate-700 flex flex-col md:flex-row items-center justify-between gap-4">
+                        <div class="flex items-center space-x-4">
+                            <!-- Circular Timer Visual -->
+                            <div class="relative w-20 h-20 flex items-center justify-center">
+                                <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                                    <path class="text-slate-700" stroke-width="4" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                    <path id="timer-progress-ring" class="text-cyan-400 transition-all duration-1000" stroke-dasharray="100, 100" stroke-width="4" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                </svg>
+                                <span id="timer-countdown" class="absolute font-black text-2xl text-cyan-300">30</span>
+                            </div>
+                            <div>
+                                <h5 class="font-bold text-white text-lg">Speaking Timer</h5>
+                                <p class="text-xs text-slate-400">Aim to speak clearly before time ends!</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <button onclick="startTimer()" id="btn-timer-start" class="bg-cyan-600 hover:bg-cyan-500 text-white px-4 py-2.5 rounded-xl font-bold text-sm shadow flex items-center gap-1.5">
+                                <i class="fas fa-play"></i> Start Timer
+                            </button>
+                            <button onclick="pauseTimer()" id="btn-timer-pause" class="bg-slate-700 hover:bg-slate-600 text-slate-200 px-3 py-2.5 rounded-xl font-bold text-sm">
+                                <i class="fas fa-pause"></i>
+                            </button>
+                            <button onclick="resetTimer()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 px-3 py-2.5 rounded-xl font-bold text-sm">
+                                <i class="fas fa-rotate-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Teacher Control Panel (1 col) -->
+                <div class="bg-slate-800/90 rounded-3xl p-6 border-2 border-yellow-500/40 space-y-6 flex flex-col justify-between shadow-xl">
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between border-b border-slate-700 pb-3">
+                            <h4 class="font-black text-lg text-yellow-400 flex items-center gap-2">
+                                🧠 TEACHER PANEL
+                            </h4>
+                            <span class="text-xs bg-yellow-500/20 text-yellow-300 border border-yellow-500/30 px-2.5 py-1 rounded-full font-bold">Evaluator</span>
+                        </div>
+                        <p class="text-xs text-slate-300">Listen to the student's spoken response and award points manually:</p>
+
+                        <!-- Award Points Buttons -->
+                        <div class="grid grid-cols-3 gap-3">
+                            <button onclick="awardScore(1, 'Great effort!')" class="bg-slate-700 hover:bg-emerald-600 border border-emerald-500/50 hover:border-emerald-400 text-emerald-300 hover:text-white py-3 rounded-2xl font-black text-lg flex flex-col items-center transition transform active:scale-95">
+                                <span>+1 ⭐</span>
+                                <span class="text-xs font-semibold opacity-80">Good</span>
+                            </button>
+                            <button onclick="awardScore(2, 'Awesome answer!')" class="bg-slate-700 hover:bg-purple-600 border border-purple-500/50 hover:border-purple-400 text-purple-300 hover:text-white py-3 rounded-2xl font-black text-lg flex flex-col items-center transition transform active:scale-95">
+                                <span>+2 ⭐</span>
+                                <span class="text-xs font-semibold opacity-80">Great</span>
+                            </button>
+                            <button onclick="awardScore(3, 'Superstar performance!')" class="bg-slate-700 hover:bg-yellow-600 border border-yellow-500/50 hover:border-yellow-400 text-yellow-300 hover:text-white py-3 rounded-2xl font-black text-lg flex flex-col items-center transition transform active:scale-95">
+                                <span>+3 ⭐</span>
+                                <span class="text-xs font-semibold opacity-80">Excellent</span>
+                            </button>
+                        </div>
+
+                        <!-- Praise / Feedback Buttons -->
+                        <div class="space-y-2 pt-2">
+                            <label class="text-xs font-bold text-slate-400 uppercase">Quick Verbal Praise:</label>
+                            <div class="grid grid-cols-2 gap-2">
+                                <button onclick="triggerFeedback('👏 GREAT JOB!')" class="bg-slate-700 hover:bg-slate-600 text-slate-200 py-2 rounded-xl text-xs font-bold transition">
+                                    👏 GREAT!
+                                </button>
+                                <button onclick="triggerFeedback('🔥 EXCELLENT!')" class="bg-slate-700 hover:bg-slate-600 text-slate-200 py-2 rounded-xl text-xs font-bold transition">
+                                    🔥 EXCELLENT!
+                                </button>
+                                <button onclick="triggerFeedback('🔄 TRY AGAIN!')" class="col-span-2 bg-red-950/40 hover:bg-red-900/60 border border-red-500/30 text-red-300 py-2 rounded-xl text-xs font-bold transition">
+                                    🔄 TRY AGAIN (0 pts)
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Next Round / Finish Stage Controls -->
+                    <div class="pt-4 border-t border-slate-700 space-y-2">
+                        <button id="btn-next-round" onclick="nextStageRound()" class="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-extrabold py-3 rounded-2xl shadow-lg transition transform hover:scale-102 flex items-center justify-center space-x-2">
+                            <span>Next Question / Level</span>
+                            <i class="fas fa-forward"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SCREEN 4: SPEAKING WHEEL -->
+        <section id="screen-speaking-wheel" class="screen-view hidden space-y-6 text-center">
+            <div class="bg-slate-800/80 p-5 rounded-3xl border border-yellow-500/30 max-w-4xl mx-auto flex items-center justify-between">
+                <div class="text-left">
+                    <h2 class="text-3xl font-black text-white flex items-center gap-2">
+                        <span>🎡</span> SPEAKING WHEEL
+                    </h2>
+                    <p class="text-slate-300 text-sm">Spin to choose a random topic for your challenge!</p>
+                </div>
+                <button onclick="showScreen('main-menu')" class="bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-xl text-sm font-bold">
+                    ← Main Menu
+                </button>
+            </div>
+
+            <div class="flex flex-col items-center justify-center space-y-6 py-4">
+                <!-- Wheel Canvas Container -->
+                <div class="relative w-80 h-80 sm:w-96 sm:h-96 md:w-[420px] md:h-[420px] flex items-center justify-center">
+                    <!-- Needle Indicator -->
+                    <div class="absolute -top-4 z-20 text-yellow-400 text-4xl filter drop-shadow-lg">
+                        ▼
+                    </div>
+                    <!-- Wheel Canvas -->
+                    <canvas id="wheelCanvas" width="450" height="450" class="rounded-full shadow-2xl border-4 border-yellow-400/50"></canvas>
+                </div>
+
+                <!-- Spin Action Button -->
+                <button id="btn-spin-wheel" onclick="spinWheel()" class="bg-gradient-to-r from-yellow-500 via-amber-500 to-orange-500 hover:from-yellow-400 hover:to-orange-400 text-slate-950 font-black text-2xl px-10 py-4 rounded-full shadow-2xl transform hover:scale-105 active:scale-95 transition glow-effect">
+                    🎡 SPIN THE WHEEL!
+                </button>
+            </div>
+        </section>
+
+        <!-- SCREEN 5: SPEAKING BATTLE (2 PLAYERS) -->
+        <section id="screen-speaking-battle" class="screen-view hidden space-y-6">
+            <div class="bg-slate-800/80 p-5 rounded-3xl border border-pink-500/30 flex items-center justify-between">
+                <div>
+                    <h2 class="text-3xl font-black text-white flex items-center gap-2">
+                        <span>⚔️</span> SPEAKING BATTLE
+                    </h2>
+                    <p class="text-slate-300 text-sm">2-Player Classroom Showdown • First to 10 Points Wins!</p>
+                </div>
+                <button onclick="showScreen('main-menu')" class="bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-xl text-sm font-bold">
+                    ← Main Menu
+                </button>
+            </div>
+
+            <!-- Scoreboard -->
+            <div class="grid grid-cols-2 gap-4 md:gap-8 max-w-4xl mx-auto">
+                <!-- Player 1 Score Box -->
+                <div id="p1-score-box" class="bg-slate-800/90 border-4 border-cyan-500 rounded-3xl p-6 text-center space-y-2 shadow-xl transition">
+                    <span class="text-xs font-black uppercase tracking-widest text-cyan-400">Speaker 1</span>
+                    <h3 id="p1-name" class="text-xl md:text-2xl font-black text-white">🔵 PLAYER 1</h3>
+                    <div class="text-5xl font-black text-cyan-300" id="battle-p1-score">0</div>
+                    <span class="text-xs text-slate-400 block font-bold">Target: 10 PTS</span>
+                </div>
+
+                <!-- Player 2 Score Box -->
+                <div id="p2-score-box" class="bg-slate-800/90 border-4 border-slate-700 rounded-3xl p-6 text-center space-y-2 shadow-xl transition opacity-70">
+                    <span class="text-xs font-black uppercase tracking-widest text-pink-400">Speaker 2</span>
+                    <h3 id="p2-name" class="text-xl md:text-2xl font-black text-white">🔴 PLAYER 2</h3>
+                    <div class="text-5xl font-black text-pink-300" id="battle-p2-score">0</div>
+                    <span class="text-xs text-slate-400 block font-bold">Target: 10 PTS</span>
+                </div>
+            </div>
+
+            <!-- Active Turn Display -->
+            <div class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 border border-purple-500/40 rounded-3xl p-6 md:p-8 space-y-6 max-w-4xl mx-auto text-center shadow-2xl">
+                <div class="inline-block bg-purple-900/60 border border-purple-500/40 px-4 py-1.5 rounded-full text-purple-300 font-bold text-xs uppercase tracking-widest">
+                    Current Turn: <span id="battle-current-player-name" class="text-yellow-400 font-extrabold">PLAYER 1</span>
+                </div>
+
+                <!-- Topic & Question -->
+                <div class="space-y-3">
+                    <span id="battle-topic-tag" class="text-slate-400 font-extrabold text-sm uppercase block">🍛 FAVOURITE FOOD</span>
+                    <h3 id="battle-question-text" class="text-2xl md:text-4xl font-black text-white leading-relaxed">
+                        What is your favourite local food?
+                    </h3>
+                </div>
+
+                <!-- Teacher Battle Scoring Buttons -->
+                <div class="pt-4 border-t border-slate-700/80 space-y-3">
+                    <p class="text-xs text-slate-300 font-bold">TEACHER EVALUATION FOR CURRENT SPEAKER:</p>
+                    <div class="flex flex-wrap items-center justify-center gap-3">
+                        <button onclick="awardBattlePoints(1)" class="bg-emerald-600 hover:bg-emerald-500 text-white font-black px-6 py-3 rounded-2xl shadow-lg transition flex items-center space-x-2">
+                            <span>✅ GOOD ANSWER (+1)</span>
+                        </button>
+                        <button onclick="awardBattlePoints(2)" class="bg-purple-600 hover:bg-purple-500 text-white font-black px-6 py-3 rounded-2xl shadow-lg transition flex items-center space-x-2">
+                            <span>⭐ EXCELLENT (+2)</span>
+                        </button>
+                        <button onclick="awardBattlePoints(0)" class="bg-slate-700 hover:bg-slate-600 text-slate-300 font-bold px-4 py-3 rounded-2xl transition">
+                            <span>🔄 TRY AGAIN (+0)</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SCREEN 6: MYSTERY SPEAKING CARDS -->
+        <section id="screen-mystery-cards" class="screen-view hidden space-y-6">
+            <div class="bg-slate-800/80 p-5 rounded-3xl border border-emerald-500/30 flex items-center justify-between">
+                <div>
+                    <h2 class="text-3xl font-black text-white flex items-center gap-2">
+                        <span>🎴</span> MYSTERY SPEAKING CARDS
+                    </h2>
+                    <p class="text-slate-300 text-sm">Pick a card to reveal speaking challenges & bonus multipliers!</p>
+                </div>
+                <button onclick="showScreen('main-menu')" class="bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-xl text-sm font-bold">
+                    ← Main Menu
+                </button>
+            </div>
+
+            <!-- Cards Deck Container -->
+            <div id="mystery-cards-deck" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 max-w-5xl mx-auto py-6">
+                <!-- 6 Flippable Cards generated dynamically -->
+            </div>
+
+            <div class="text-center">
+                <button onclick="generateMysteryCards()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-8 py-3 rounded-2xl shadow-lg transition">
+                    🎲 Shuffle & Deal New Cards
+                </button>
+            </div>
+        </section>
+
+        <!-- SCREEN 7: FINAL SCORE SCREEN -->
+        <section id="screen-final-score" class="screen-view hidden text-center space-y-8 py-8">
+            <div class="max-w-2xl mx-auto bg-slate-800/90 border-2 border-yellow-500/40 rounded-3xl p-8 space-y-6 shadow-2xl relative overflow-hidden">
+                <div class="space-y-2">
+                    <span class="text-6xl animate-bounce-subtle inline-block">🎉</span>
+                    <h2 class="text-3xl md:text-5xl font-black text-white">SPEAKING MISSION COMPLETE!</h2>
+                    <p id="final-badge-text" class="text-xl font-bold text-yellow-400">SPEAKING SUPERSTAR! 🏆</p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 bg-slate-900/70 p-6 rounded-2xl border border-slate-700">
+                    <div class="space-y-1">
+                        <span class="text-xs text-slate-400 uppercase font-bold">Total Points</span>
+                        <div id="final-total-points" class="text-4xl font-black text-yellow-400">0</div>
+                    </div>
+                    <div class="space-y-1">
+                        <span class="text-xs text-slate-400 uppercase font-bold">Questions Answered</span>
+                        <div id="final-questions-count" class="text-4xl font-black text-cyan-400">0</div>
+                    </div>
+                </div>
+
+                <div class="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
+                    <button onclick="showScreen('speaking-map')" class="w-full sm:w-auto bg-purple-600 hover:bg-purple-500 text-white px-8 py-3.5 rounded-2xl font-black shadow-lg transition">
+                        🗺️ Adventure Map
+                    </button>
+                    <button onclick="showScreen('main-menu')" class="w-full sm:w-auto bg-slate-700 hover:bg-slate-600 text-white px-8 py-3.5 rounded-2xl font-black shadow-lg transition">
+                        🏠 Main Menu
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- MODALS SECTION -->
+    <!-- Modal 1: How to Play -->
+    <div id="modal-how-to-play" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-slate-800 border border-slate-700 rounded-3xl max-w-xl w-full p-6 md:p-8 space-y-6 shadow-2xl relative">
+            <button onclick="closeModal('modal-how-to-play')" class="absolute top-4 right-4 text-slate-400 hover:text-white text-xl">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="space-y-2">
+                <h3 class="text-2xl font-black text-yellow-400 flex items-center gap-2">
+                    📖 HOW TO PLAY
+                </h3>
+                <p class="text-xs text-slate-300">Classroom rules for students & teachers</p>
+            </div>
+            <div class="space-y-4 text-sm text-slate-200">
+                <div class="flex items-start space-x-3">
+                    <span class="bg-purple-600/30 text-purple-300 font-bold p-2 rounded-xl text-xs">1</span>
+                    <p><strong>Read the Challenge:</strong> Select any topic or game mode. Read the question displayed on the classroom screen.</p>
+                </div>
+                <div class="flex items-start space-x-3">
+                    <span class="bg-purple-600/30 text-purple-300 font-bold p-2 rounded-xl text-xs">2</span>
+                    <p><strong>Think & Speak Aloud:</strong> Speak your response clearly in English. Click 💡 HELP if you need sentence starters!</p>
+                </div>
+                <div class="flex items-start space-x-3">
+                    <span class="bg-purple-600/30 text-purple-300 font-bold p-2 rounded-xl text-xs">3</span>
+                    <p><strong>Teacher Evaluation:</strong> The teacher awards 1 to 3 stars ⭐ based on clarity, effort, and depth of explanation.</p>
+                </div>
+            </div>
+            <button onclick="closeModal('modal-how-to-play')" class="w-full bg-purple-600 hover:bg-purple-500 text-white font-bold py-3 rounded-xl transition">
+                Got It! Let's Play
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal 2: Time's Up Prompt -->
+    <div id="modal-times-up" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-slate-800 border-2 border-red-500/50 rounded-3xl max-w-md w-full p-6 text-center space-y-6 shadow-2xl">
+            <div class="space-y-2">
+                <span class="text-5xl">⏰</span>
+                <h3 class="text-3xl font-black text-white">TIME'S UP!</h3>
+                <p class="text-slate-300 text-sm">Did the student complete their speaking answer?</p>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <button onclick="handleTimeUpAnswer(true)" class="bg-emerald-600 hover:bg-emerald-500 text-white font-black py-3 rounded-2xl transition">
+                    ✅ YES (+1 Star)
+                </button>
+                <button onclick="handleTimeUpAnswer(false)" class="bg-slate-700 hover:bg-slate-600 text-slate-300 font-bold py-3 rounded-2xl transition">
+                    ❌ NOT YET
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Feedback Toast Popup -->
+    <div id="toast-feedback" class="fixed bottom-6 right-6 z-50 hidden transform transition-all duration-300">
+        <div id="toast-body" class="bg-gradient-to-r from-yellow-500 to-amber-600 text-slate-950 font-black px-6 py-3.5 rounded-2xl shadow-2xl flex items-center space-x-2 text-lg">
+            <span id="toast-text">👏 GREAT JOB!</span>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // QUESTION BANK - 11 TOPICS WITH 4 LEVELS & VOCABULARY
+        const QUESTION_BANK = [
+            {
+                id: 'shop',
+                title: 'My Favourite Shop',
+                icon: '🛍️',
+                vocab: 'mall, house, clothes, big',
+                questions: [
+                    { level: '🟢 LEVEL 1 – EASY', text: 'Where is your favourite shop?', help: ['My favourite shop is ______.', 'It is near ______.'] },
+                    { level: '🟡 LEVEL 2 – SPEAK', text: 'Why do you like it there?', help: ['I like it because ______.', 'The shop sells ______ and has friendly staff.'] },
+                    { level: '🟠 LEVEL 3 – EXPLAIN', text: 'What do you like to buy?', help: ['I usually buy ______ such as ______.', 'It offers reasonable prices for ______.'] },
+                    { level: '🔴 LEVEL 4 – THINK', text: 'Do you think teenagers can buy everything that they want? Why / Why not?', help: ['In my opinion, teenagers can/cannot buy everything because ______.', 'They have limited pocket money / budget.'] }
+                ]
+            },
+            {
+                id: 'famous',
+                title: 'A Famous Person',
+                icon: '⭐',
+                vocab: 'name, singer, kind, famous',
+                questions: [
+                    { level: '🟢 LEVEL 1 – EASY', text: 'Who is this person?', help: ['The famous person I admire is ______.', 'He/She is a well-known ______ (singer / athlete / actor).'] },
+                    { level: '🟡 LEVEL 2 – SPEAK', text: 'How did you know about this person?', help: ['I learned about this person from ______ (social media / TV / news).', 'I first saw them in ______.'] },
+                    { level: '🟠 LEVEL 3 – EXPLAIN', text: 'Why do you admire the person?', help: ['I admire this person because he/she is very ______ and hardworking.', 'They inspire me to ______.'] },
+                    { level: '🔴 LEVEL 4 – THINK', text: 'Can being famous change a person\'s way of living? Why / Why not?', help: ['Yes/No, being famous can change a person\'s life because ______.', 'They lose privacy / get more opportunities.'] }
+                ]
+            },
+            {
+                id: 'school-event',
+                title: 'A School Event',
+                icon: '🏫',
+                vocab: 'sports day, running, teacher, happy',
+                questions: [
+                    { level: '🟢 LEVEL 1 – EASY', text: 'What was the event?', help: ['The school event was ______ (Sports Day / Teachers\' Day / Canteen Day).'] },
+                    { level: '🟡 LEVEL 2 – SPEAK', text: 'When was it held?', help: ['It was held on ______ at our school field / hall.', 'It took place last ______.'] },
+                    { level: '🟠 LEVEL 3 – EXPLAIN', text: 'What did you do there?', help: ['During the event, I participated in ______.', 'I also helped my teacher and friends to ______.'] },
+                    { level: '🔴 LEVEL 4 – THINK', text: 'Do you think students should celebrate events at school? Why or why not?', help: ['I think students should/should not celebrate events because ______.', 'It creates great memories and strengthens teamwork.'] }
+                ]
+            },
+            {
+                id: 'food',
+                title: 'My Favourite Food',
+                icon: '🍛',
+                vocab: 'nasi lemak, coconut, home, delicious',
+                questions: [
+                    { level: '🟢 LEVEL 1 – EASY', text: 'What is the food?', help: ['My favourite food is ______ (nasi lemak / laksa / chicken rice).'] },
+                    { level: '🟡 LEVEL 2 – SPEAK', text: 'Where can you buy this food?', help: ['I usually buy this food at ______ / near my home.', 'My family prepares it at home.'] },
+                    { level: '🟠 LEVEL 3 – EXPLAIN', text: 'Why do you like this food?', help: ['I love this food because it tastes ______ and spicy.', 'The combination of ingredients makes it delicious.'] },
+                    { level: '🔴 LEVEL 4 – THINK', text: 'Do you think it is alright to love western-style food more than local food? Why / Why not?', help: ['In my view, it is fine/not fine because ______.', 'Everyone has different taste preferences, but local food represents culture.'] }
+                ]
+            },
+            {
+                id: 'family-member',
+                title: 'A Family Member',
+                icon: '👨‍👩‍👧',
+                vocab: 'mother, father, hardworking, support',
+                questions: [
+                    { level: '🟢 LEVEL 1 – EASY', text: 'Who is this family member?', help: ['The family member I am talking about is my ______ (mother / father / sibling).'] },
+                    { level: '🟡 LEVEL 2 – SPEAK', text: 'What good qualities does this person have?', help: ['He/She is very hardworking, caring, and ______.', 'They are always patient with me.'] },
+                    { level: '🟠 LEVEL 3 – EXPLAIN', text: 'How has this person helped or influenced you?', help: ['This person helped me by ______ whenever I faced difficulties.', 'They taught me to be ______.'] },
+                    { level: '🔴 LEVEL 4 – THINK', text: 'Do you think everyone should have someone to respect? Why / Why not?', help: ['Yes, having someone to respect helps us to ______.', 'It guides us to make good moral choices.'] }
+                ]
+            },
+            {
+                id: 'celebration',
+                title: 'A Family Celebration',
+                icon: '🎉',
+                vocab: 'Hari Raya, grandparents, cookies, happy',
+                questions: [
+                    { level: '🟢 LEVEL 1 – EASY', text: 'What was the event?', help: ['The family celebration was ______ (Hari Raya / Chinese New Year / Birthday Party).'] },
+                    { level: '🟡 LEVEL 2 – SPEAK', text: 'What did you do there?', help: ['We gathered at my grandparents\' house and ate ______ together.', 'We took family photos.'] },
+                    { level: '🟠 LEVEL 3 – EXPLAIN', text: 'Did you enjoy yourself? Why / Why not?', help: ['I enjoyed myself very much because ______.', 'I got to meet all my relatives and cousins.'] },
+                    { level: '🔴 LEVEL 4 – THINK', text: 'Why are family celebrations important?', help: ['Family celebrations are important because they strengthen family bonds.', 'They help us stay connected.'] }
+                ]
+            },
+            {
+                id: 'fruit',
+                title: 'My Favourite Fruit',
+                icon: '🍎',
+                vocab: 'apple, juicy, morning, health',
+                questions: [
+                    { level: '🟢 LEVEL 1 – EASY', text: 'What is the fruit?', help: ['My favourite fruit is a/an ______ (apple / mango / watermelon).'] },
+                    { level: '🟡 LEVEL 2 – SPEAK', text: 'How does it look and taste?', help: ['It looks red/yellow and tastes very sweet and juicy.', 'It has a crisp texture.'] },
+                    { level: '🟠 LEVEL 3 – EXPLAIN', text: 'When do you usually eat it?', help: ['I usually eat it in the morning / after lunch as a healthy snack.'] },
+                    { level: '🔴 LEVEL 4 – THINK', text: 'Should people eat fruits every day? Why / Why not?', help: ['Yes, people should eat fruits daily because they contain vitamins.', 'It improves overall health.'] }
+                ]
+            },
+            {
+                id: 'present',
+                title: 'A Present I Want',
+                icon: '🎁',
+                vocab: 'watch, useful, school, happy',
+                questions: [
+                    { level: '🟢 LEVEL 1 – EASY', text: 'What is it?', help: ['The present I really want is a ______ (smartwatch / bicycle / book).'] },
+                    { level: '🟡 LEVEL 2 – SPEAK', text: 'Why do you want it?', help: ['I want it because it is very useful for my school work / fitness.', 'I have wanted it for a long time.'] },
+                    { level: '🟠 LEVEL 3 – EXPLAIN', text: 'Who should get you the present?', help: ['I hope my parents / family will get it for my birthday.'] },
+                    { level: '🔴 LEVEL 4 – THINK', text: 'Should someone receive a present every year? Why / Why not?', help: ['In my opinion, getting a present every year is/is not necessary because ______.', 'Gifts show appreciation, but being grateful is more important.'] }
+                ]
+            },
+            {
+                id: 'gadget',
+                title: 'My Favourite Gadget',
+                icon: '📱',
+                vocab: 'phone, chat, evening, learn',
+                questions: [
+                    { level: '🟢 LEVEL 1 – EASY', text: 'What is the gadget?', help: ['My favourite gadget is my ______ (smartphone / tablet / laptop).'] },
+                    { level: '🟡 LEVEL 2 – SPEAK', text: 'How do you use it?', help: ['I use it to chat with friends, complete revision, and watch videos.'] },
+                    { level: '🟠 LEVEL 3 – EXPLAIN', text: 'When do you usually use it?', help: ['I usually use it in the evening after finishing my homework.'] },
+                    { level: '🔴 LEVEL 4 – THINK', text: 'Should students use gadgets during study? Why / Why not?', help: ['Students should/should not use gadgets during study because ______.', 'They can find extra information, but might get distracted.'] }
+                ]
+            },
+            {
+                id: 'online-shopping',
+                title: 'Online Shopping',
+                icon: '🛒',
+                vocab: 'Shopee, clothes, convenient, delivery',
+                questions: [
+                    { level: '🟢 LEVEL 1 – EASY', text: 'What is the name of the application?', help: ['The online shopping app I use or know is ______ (Shopee / Lazada).'] },
+                    { level: '🟡 LEVEL 2 – SPEAK', text: 'What do you usually buy?', help: ['People usually buy clothes, stationeries, and electronic items online.'] },
+                    { level: '🟠 LEVEL 3 – EXPLAIN', text: 'Why do you use it?', help: ['I use it because it is very convenient and offers vouchers.'] },
+                    { level: '🔴 LEVEL 4 – THINK', text: 'Is shopping using an online application helpful? Why / Why not?', help: ['Yes/No, online shopping is helpful because it saves time and effort.'] }
+                ]
+            },
+            {
+                id: 'holiday',
+                title: 'An Interesting Holiday',
+                icon: '🏝️',
+                vocab: 'Langkawi, beach, exciting, family',
+                questions: [
+                    { level: '🟢 LEVEL 1 – EASY', text: 'Where did you go?', help: ['I went on holiday to ______ (Langkawi / Cameron Highlands / Penang).'] },
+                    { level: '🟡 LEVEL 2 – SPEAK', text: 'What did you do there?', help: ['While there, I visited tourist spots, swam in the sea, and ate local food.'] },
+                    { level: '🟠 LEVEL 3 – EXPLAIN', text: 'Did you enjoy yourself? Why / Why not?', help: ['I enjoyed myself thoroughly because the place was exciting and beautiful.'] },
+                    { level: '🔴 LEVEL 4 – THINK', text: 'How can one plan a successful holiday?', help: ['To plan a successful holiday, one should book accommodation early and plan budget.'] }
+                ]
+            }
+        ];
+
+        let state = {
+            totalPoints: 0,
+            questionsAnsweredCount: 0,
+            completedStages: new Set(),
+            currentTopicIndex: 0,
+            currentQuestionIndex: 0,
+            timerSeconds: 30,
+            timerInterval: null,
+            audioEnabled: true,
+            // Battle mode state
+            battleP1Score: 0,
+            battleP2Score: 0,
+            battleCurrentPlayer: 1,
+            battleQuestion: null
+        };
+
+        // Audio Effects Synthesizer using Web Audio API
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playSound(type) {
+            if (!state.audioEnabled) return;
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                const now = audioCtx.currentTime;
+
+                if (type === 'click') {
+                    osc.frequency.setValueAtTime(400, now);
+                    gain.gain.setValueAtTime(0.1, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+                    osc.start(now);
+                    osc.stop(now + 0.05);
+                } else if (type === 'star') {
+                    osc.frequency.setValueAtTime(523.25, now); // C5
+                    osc.frequency.setValueAtTime(659.25, now + 0.1); // E5
+                    osc.frequency.setValueAtTime(783.99, now + 0.2); // G5
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+                    osc.start(now);
+                    osc.stop(now + 0.35);
+                } else if (type === 'spin') {
+                    osc.frequency.setValueAtTime(300 + Math.random() * 200, now);
+                    gain.gain.setValueAtTime(0.05, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.04);
+                    osc.start(now);
+                    osc.stop(now + 0.04);
+                } else if (type === 'alarm') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(800, now);
+                    osc.frequency.setValueAtTime(400, now + 0.15);
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                    osc.start(now);
+                    osc.stop(now + 0.3);
+                }
+            } catch (e) {
+                console.log('Audio playback prevented or unsupported');
+            }
+        }
+
+        function toggleAudio() {
+            state.audioEnabled = !state.audioEnabled;
+            const icon = document.getElementById('audio-icon');
+            if (state.audioEnabled) {
+                icon.className = 'fas fa-volume-up text-lg text-emerald-400';
+            } else {
+                icon.className = 'fas fa-volume-mute text-lg text-slate-500';
+            }
+        }
+
+        function showScreen(screenId) {
+            playSound('click');
+            document.querySelectorAll('.screen-view').forEach(s => s.classList.add('hidden'));
+            document.querySelectorAll('.screen-view').forEach(s => s.classList.remove('active'));
+
+            const target = document.getElementById(`screen-${screenId}`);
+            if (target) {
+                target.classList.remove('hidden');
+                target.classList.add('active');
+            }
+
+            if (screenId === 'speaking-map') {
+                renderAdventureMap();
+            } else if (screenId === 'speaking-wheel') {
+                initWheelCanvas();
+            } else if (screenId === 'mystery-cards') {
+                generateMysteryCards();
+            }
+        }
+
+        function closeModal(modalId) {
+            playSound('click');
+            document.getElementById(modalId).classList.add('hidden');
+            document.getElementById(modalId).classList.remove('flex');
+        }
+
+        function openHowToPlayModal() {
+            const modal = document.getElementById('modal-how-to-play');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function renderAdventureMap() {
+            const container = document.getElementById('stages-map-grid');
+            container.innerHTML = '';
+
+            QUESTION_BANK.forEach((topic, index) => {
+                const isCompleted = state.completedStages.has(index);
+
+                const card = document.createElement('div');
+                card.className = `bg-slate-800/90 border-2 ${isCompleted ? 'border-emerald-500/80 bg-emerald-950/20' : 'border-slate-700/80 hover:border-purple-500'} rounded-3xl p-5 cursor-pointer transition transform hover:-translate-y-1 hover:shadow-xl flex flex-col justify-between space-y-4`;
+
+                card.onclick = () => startStageChallenge(index, 0);
+
+                card.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <span class="text-3xl p-2 bg-slate-700/50 rounded-2xl">${topic.icon}</span>
+                        <span class="text-xs font-black px-2.5 py-1 rounded-full ${isCompleted ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' : 'bg-slate-700 text-slate-300'}">
+                            ${isCompleted ? '✓ COMPLETED' : `STAGE ${index + 1}`}
+                        </span>
+                    </div>
+                    <div>
+                        <h4 class="font-extrabold text-lg text-white group-hover:text-purple-300">${topic.title}</h4>
+                        <p class="text-xs text-slate-400 mt-1">4 Rounds • Level 1 to 4</p>
+                    </div>
+                    <div class="pt-2 border-t border-slate-700/60 flex items-center justify-between text-xs font-bold text-purple-400">
+                        <span>Start Speaking</span>
+                        <i class="fas fa-play-circle text-base"></i>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function startStageChallenge(topicIdx, questionIdx = 0) {
+            state.currentTopicIndex = topicIdx;
+            state.currentQuestionIndex = questionIdx;
+
+            const topic = QUESTION_BANK[topicIdx];
+            const q = topic.questions[questionIdx];
+
+            document.getElementById('challenge-topic-icon').innerText = topic.icon;
+            document.getElementById('challenge-topic-title').innerText = `Stage ${topicIdx + 1} of 11`;
+            document.getElementById('challenge-topic-name').innerText = topic.title.toUpperCase();
+
+            document.getElementById('challenge-level-badge').innerText = q.level;
+            document.getElementById('challenge-question-text').innerText = q.text;
+
+            // Vocabulary tags
+            document.getElementById('challenge-vocab-tags').innerText = topic.vocab;
+
+            // Sentence starters
+            const helpContainer = document.getElementById('help-drawer-content');
+            helpContainer.innerHTML = '';
+            q.help.forEach(starter => {
+                const p = document.createElement('p');
+                p.className = 'text-slate-100 bg-slate-800/80 p-2.5 rounded-xl border border-slate-700';
+                p.innerText = starter;
+                helpContainer.appendChild(p);
+            });
+
+            // Close help drawer if open
+            document.getElementById('help-drawer').classList.add('hidden');
+            document.getElementById('help-chevron').style.transform = 'rotate(0deg)';
+
+            resetTimer();
+            showScreen('challenge');
+        }
+
+        function loadNextRandomQuestionInTopic() {
+            playSound('click');
+            const topic = QUESTION_BANK[state.currentTopicIndex];
+            const randomIdx = Math.floor(Math.random() * topic.questions.length);
+            startStageChallenge(state.currentTopicIndex, randomIdx);
+        }
+
+        function toggleHelpDrawer() {
+            playSound('click');
+            const drawer = document.getElementById('help-drawer');
+            const chevron = document.getElementById('help-chevron');
+
+            if (drawer.classList.contains('hidden')) {
+                drawer.classList.remove('hidden');
+                chevron.style.transform = 'rotate(180deg)';
+            } else {
+                drawer.classList.add('hidden');
+                chevron.style.transform = 'rotate(0deg)';
+            }
+        }
+
+        // TIMER FUNCTIONS
+        function startTimer() {
+            if (state.timerInterval) clearInterval(state.timerInterval);
+            playSound('click');
+
+            state.timerInterval = setInterval(() => {
+                if (state.timerSeconds > 0) {
+                    state.timerSeconds--;
+                    updateTimerDisplay();
+                } else {
+                    clearInterval(state.timerInterval);
+                    state.timerInterval = null;
+                    playSound('alarm');
+                    openTimesUpModal();
+                }
+            }, 1000);
+        }
+
+        function pauseTimer() {
+            playSound('click');
+            if (state.timerInterval) {
+                clearInterval(state.timerInterval);
+                state.timerInterval = null;
+            }
+        }
+
+        function resetTimer() {
+            pauseTimer();
+            state.timerSeconds = 30;
+            updateTimerDisplay();
+        }
+
+        function updateTimerDisplay() {
+            document.getElementById('timer-countdown').innerText = state.timerSeconds;
+            const progress = (state.timerSeconds / 30) * 100;
+            document.getElementById('timer-progress-ring').setAttribute('stroke-dasharray', `${progress}, 100`);
+        }
+
+        function openTimesUpModal() {
+            const modal = document.getElementById('modal-times-up');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function handleTimeUpAnswer(completed) {
+            closeModal('modal-times-up');
+            if (completed) {
+                awardScore(1, 'Completed on time! +1 ⭐');
+            } else {
+                triggerFeedback('⏰ Time is up! Try again next time!');
+            }
+        }
+
+        function awardScore(points, feedbackMsg) {
+            playSound('star');
+            state.totalPoints += points;
+            state.questionsAnsweredCount++;
+            document.getElementById('nav-score').innerText = state.totalPoints;
+
+            triggerFeedback(feedbackMsg || `+${points} Stars Awarded!`);
+            triggerConfetti();
+        }
+
+        function triggerFeedback(text) {
+            const toast = document.getElementById('toast-feedback');
+            document.getElementById('toast-text').innerText = text;
+
+            toast.classList.remove('hidden');
+            toast.classList.add('animate-bounce-subtle');
+
+            setTimeout(() => {
+                toast.classList.add('hidden');
+                toast.classList.remove('animate-bounce-subtle');
+            }, 2500);
+        }
+
+        function nextStageRound() {
+            playSound('click');
+            if (state.currentQuestionIndex < 3) {
+                // Next level in same topic
+                startStageChallenge(state.currentTopicIndex, state.currentQuestionIndex + 1);
+            } else {
+                // Topic finished
+                state.completedStages.add(state.currentTopicIndex);
+                if (state.currentTopicIndex < QUESTION_BANK.length - 1) {
+                    startStageChallenge(state.currentTopicIndex + 1, 0);
+                } else {
+                    finishGameMission();
+                }
+            }
+        }
+
+        function startQuickSpeak() {
+            const randomTopicIdx = Math.floor(Math.random() * QUESTION_BANK.length);
+            const randomQIdx = Math.floor(Math.random() * 4);
+            startStageChallenge(randomTopicIdx, randomQIdx);
+        }
+
+        function leaveChallenge() {
+            playSound('click');
+            showScreen('main-menu');
+        }
+
+        let wheelAngle = 0;
+        let isSpinning = false;
+
+        function initWheelCanvas() {
+            const canvas = document.getElementById('wheelCanvas');
+            const ctx = canvas.getContext('2d');
+            const numSectors = QUESTION_BANK.length;
+            const sectorAngle = (2 * Math.PI) / numSectors;
+
+            const colors = [
+                '#ef4444', '#f97316', '#f59e0b', '#10b981', '#06b6d4', 
+                '#3b82f6', '#6366f1', '#8b5cf6', '#ec4899', '#f43f5e', '#14b8a6'
+            ];
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            ctx.save();
+            ctx.translate(canvas.width / 2, canvas.height / 2);
+            ctx.rotate(wheelAngle);
+
+            for (let i = 0; i < numSectors; i++) {
+                const angle = i * sectorAngle;
+                ctx.beginPath();
+                ctx.moveTo(0, 0);
+                ctx.arc(0, 0, canvas.width / 2 - 10, angle, angle + sectorAngle);
+                ctx.fillStyle = colors[i % colors.length];
+                ctx.fill();
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = '#0f172a';
+                ctx.stroke();
+
+                // Draw Text
+                ctx.save();
+                ctx.rotate(angle + sectorAngle / 2);
+                ctx.textAlign = 'right';
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 15px Fredoka, sans-serif';
+                ctx.fillText(`${QUESTION_BANK[i].icon} ${QUESTION_BANK[i].title.substring(0, 12)}`, canvas.width / 2 - 25, 5);
+                ctx.restore();
+            }
+
+            // Center Pin
+            ctx.beginPath();
+            ctx.arc(0, 0, 30, 0, 2 * Math.PI);
+            ctx.fillStyle = '#0f172a';
+            ctx.fill();
+            ctx.lineWidth = 4;
+            ctx.strokeStyle = '#f59e0b';
+            ctx.stroke();
+
+            ctx.restore();
+        }
+
+        function spinWheel() {
+            if (isSpinning) return;
+            isSpinning = true;
+
+            let spinTime = 0;
+            const spinDuration = 3500; // ms
+            const startAngle = wheelAngle;
+            const totalRotation = Math.PI * 10 + Math.random() * Math.PI * 4;
+
+            const startTime = performance.now();
+
+            function animateSpin(currentTime) {
+                spinTime = currentTime - startTime;
+                if (spinTime < spinDuration) {
+                    const progress = spinTime / spinDuration;
+                    const easeOut = 1 - Math.pow(1 - progress, 3);
+                    wheelAngle = startAngle + totalRotation * easeOut;
+                    initWheelCanvas();
+                    playSound('spin');
+                    requestAnimationFrame(animateSpin);
+                } else {
+                    isSpinning = false;
+                    wheelAngle = (startAngle + totalRotation) % (2 * Math.PI);
+                    initWheelCanvas();
+
+                    // Calculate selected topic
+                    const numSectors = QUESTION_BANK.length;
+                    const sectorAngle = (2 * Math.PI) / numSectors;
+                    // Adjust for needle at top (-PI/2)
+                    let normalizedAngle = (2.5 * Math.PI - wheelAngle) % (2 * Math.PI);
+                    const selectedIdx = Math.floor(normalizedAngle / sectorAngle) % numSectors;
+
+                    setTimeout(() => {
+                        startStageChallenge(selectedIdx, Math.floor(Math.random() * 4));
+                    }, 500);
+                }
+            }
+
+            requestAnimationFrame(animateSpin);
+        }
+
+        function startBattleMode() {
+            state.battleP1Score = 0;
+            state.battleP2Score = 0;
+            state.battleCurrentPlayer = 1;
+
+            updateBattleUI();
+            nextBattleQuestion();
+            showScreen('speaking-battle');
+        }
+
+        function nextBattleQuestion() {
+            const randomTopic = QUESTION_BANK[Math.floor(Math.random() * QUESTION_BANK.length)];
+            const randomQ = randomTopic.questions[Math.floor(Math.random() * randomTopic.questions.length)];
+
+            document.getElementById('battle-topic-tag').innerText = `${randomTopic.icon} ${randomTopic.title}`;
+            document.getElementById('battle-question-text').innerText = randomQ.text;
+        }
+
+        function awardBattlePoints(pts) {
+            playSound('star');
+            if (state.battleCurrentPlayer === 1) {
+                state.battleP1Score += pts;
+                state.battleCurrentPlayer = 2;
+            } else {
+                state.battleP2Score += pts;
+                state.battleCurrentPlayer = 1;
+            }
+
+            updateBattleUI();
+
+            if (state.battleP1Score >= 10 || state.battleP2Score >= 10) {
+                const winner = state.battleP1Score >= 10 ? 'PLAYER 1 🔵' : 'PLAYER 2 🔴';
+                triggerConfetti();
+                triggerFeedback(`🏆 ${winner} IS THE SPEAKING CHAMPION!`);
+                setTimeout(() => showScreen('main-menu'), 4000);
+            } else {
+                nextBattleQuestion();
+            }
+        }
+
+        function updateBattleUI() {
+            document.getElementById('battle-p1-score').innerText = state.battleP1Score;
+            document.getElementById('battle-p2-score').innerText = state.battleP2Score;
+
+            const p1Box = document.getElementById('p1-score-box');
+            const p2Box = document.getElementById('p2-score-box');
+            const playerTag = document.getElementById('battle-current-player-name');
+
+            if (state.battleCurrentPlayer === 1) {
+                p1Box.className = 'bg-slate-800/90 border-4 border-cyan-500 rounded-3xl p-6 text-center space-y-2 shadow-xl transition scale-105';
+                p2Box.className = 'bg-slate-800/90 border-4 border-slate-700 rounded-3xl p-6 text-center space-y-2 shadow-xl transition opacity-60';
+                playerTag.innerText = 'PLAYER 1 (BLUE)';
+                playerTag.className = 'text-cyan-400 font-extrabold';
+            } else {
+                p2Box.className = 'bg-slate-800/90 border-4 border-pink-500 rounded-3xl p-6 text-center space-y-2 shadow-xl transition scale-105';
+                p1Box.className = 'bg-slate-800/90 border-4 border-slate-700 rounded-3xl p-6 text-center space-y-2 shadow-xl transition opacity-60';
+                playerTag.innerText = 'PLAYER 2 (RED)';
+                playerTag.className = 'text-pink-400 font-extrabold';
+            }
+        }
+
+        const BONUS_MODIFIERS = [
+            '⭐ DOUBLE POINTS: Speak at least 3 sentences!',
+            '🔥 CHALLENGE: Give a strong reason for your answer.',
+            '🎯 EXAMPLE: Give one personal example.',
+            '💬 ASK A FRIEND: Ask another classmate a related question!',
+            '🎲 BONUS: Free +1 point if spoken fluently!'
+        ];
+
+        function generateMysteryCards() {
+            const container = document.getElementById('mystery-cards-deck');
+            container.innerHTML = '';
+
+            for (let i = 0; i < 6; i++) {
+                const randomTopic = QUESTION_BANK[Math.floor(Math.random() * QUESTION_BANK.length)];
+                const randomQ = randomTopic.questions[Math.floor(Math.random() * randomTopic.questions.length)];
+                const bonus = BONUS_MODIFIERS[Math.floor(Math.random() * BONUS_MODIFIERS.length)];
+
+                const cardWrapper = document.createElement('div');
+                cardWrapper.className = 'card-container h-64 w-full cursor-pointer';
+
+                cardWrapper.innerHTML = `
+                    <div class="card-inner w-full h-full relative rounded-3xl shadow-xl">
+                        <!-- FRONT OF CARD -->
+                        <div class="card-front absolute inset-0 bg-gradient-to-br from-purple-700 to-indigo-900 border-2 border-purple-400/50 rounded-3xl p-6 flex flex-col items-center justify-center text-center space-y-3">
+                            <span class="text-5xl">🎴</span>
+                            <h4 class="font-extrabold text-xl text-yellow-300">CARD #${i + 1}</h4>
+                            <p class="text-xs text-purple-200 uppercase tracking-widest font-bold">Tap to Flip & Reveal</p>
+                        </div>
+                        <!-- BACK OF CARD -->
+                        <div class="card-back absolute inset-0 bg-slate-800 border-2 border-emerald-500/60 rounded-3xl p-5 flex flex-col justify-between text-left space-y-2">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-bold text-emerald-400 uppercase">${randomTopic.icon} ${randomTopic.title}</span>
+                                <span class="text-xs font-black bg-emerald-500/20 text-emerald-300 px-2.5 py-1 rounded-full">+2 PTS</span>
+                            </div>
+                            <p class="font-black text-slate-100 text-base line-clamp-3 leading-snug">${randomQ.text}</p>
+                            <div class="bg-slate-900/80 p-2 rounded-xl text-[11px] font-semibold text-yellow-300 border border-yellow-500/30">
+                                ${bonus}
+                            </div>
+                            <button onclick="event.stopPropagation(); startStageChallenge(${QUESTION_BANK.indexOf(randomTopic)}, 0)" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-1.5 rounded-xl text-xs transition">
+                                Answer This Question 🗣️
+                            </button>
+                        </div>
+                    </div>
+                `;
+
+                cardWrapper.onclick = function() {
+                    playSound('click');
+                    const inner = this.querySelector('.card-inner');
+                    inner.classList.toggle('flipped');
+                };
+
+                container.appendChild(cardWrapper);
+            }
+        }
+
+        function finishGameMission() {
+            playSound('star');
+            triggerConfetti();
+
+            document.getElementById('final-total-points').innerText = state.totalPoints;
+            document.getElementById('final-questions-count').innerText = state.questionsAnsweredCount;
+
+            const badgeElem = document.getElementById('final-badge-text');
+            if (state.totalPoints >= 15) {
+                badgeElem.innerText = 'SPEAKING SUPERSTAR! 🏆';
+            } else if (state.totalPoints >= 10) {
+                badgeElem.innerText = 'GREAT SPEAKER! ⭐';
+            } else if (state.totalPoints >= 5) {
+                badgeElem.innerText = 'GOOD SPEAKING! 👏';
+            } else {
+                badgeElem.innerText = 'KEEP PRACTISING! 💪';
+            }
+
+            showScreen('final-score');
+        }
+
+        function resetGameProgress() {
+            if (confirm('Are you sure you want to reset all game scores and unlocked stages?')) {
+                playSound('click');
+                state.totalPoints = 0;
+                state.questionsAnsweredCount = 0;
+                state.completedStages.clear();
+                document.getElementById('nav-score').innerText = '0';
+                showScreen('main-menu');
+            }
+        }
+
+        // Lightweight Confetti Particle Animation
+        function triggerConfetti() {
+            const canvas = document.getElementById('confettiCanvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const particles = [];
+            const colors = ['#f59e0b', '#ec4899', '#3b82f6', '#10b981', '#8b5cf6'];
+
+            for (let i = 0; i < 80; i++) {
+                particles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height - canvas.height,
+                    size: Math.random() * 8 + 4,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    speedY: Math.random() * 3 + 2,
+                    speedX: Math.random() * 2 - 1,
+                    rotation: Math.random() * 360
+                });
+            }
+
+            let animationFrame;
+            let startTime = performance.now();
+
+            function render() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                particles.forEach(p => {
+                    p.y += p.speedY;
+                    p.x += p.speedX;
+                    p.rotation += 2;
+
+                    ctx.save();
+                    ctx.translate(p.x, p.y);
+                    ctx.rotate((p.rotation * Math.PI) / 180);
+                    ctx.fillStyle = p.color;
+                    ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+                    ctx.restore();
+                });
+
+                if (performance.now() - startTime < 3000) {
+                    animationFrame = requestAnimationFrame(render);
+                } else {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    cancelAnimationFrame(animationFrame);
+                }
+            }
+
+            render();
+        }
+
+        // Initialize on window load
+        window.onload = function() {
+            renderAdventureMap();
+        };
+    </script>
+</body>
+</html>
